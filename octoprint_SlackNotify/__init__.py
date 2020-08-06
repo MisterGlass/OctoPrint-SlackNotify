@@ -5,10 +5,13 @@ from slackclient import SlackClient
 
 
 class SlackNotifyPlugin(octoprint.plugin.EventHandlerPlugin,
-                           octoprint.plugin.SettingsPlugin,
-                           octoprint.plugin.TemplatePlugin):
+                        octoprint.plugin.SettingsPlugin,
+                        octoprint.plugin.TemplatePlugin):
     def get_settings_defaults(self):
         return dict(bot_token=None, channel_id=None)
+
+    def get_settings_restricted_paths(self):
+        return dict(admin=["bot_token"])
 
     def _send_to_slack(self, message, media=None):
         token = self._settings.get(['bot_token'])
@@ -32,7 +35,6 @@ class SlackNotifyPlugin(octoprint.plugin.EventHandlerPlugin,
                 channel=recipient,
                 text=message,
             )
-
 
     def on_event(self, event, payload):
         if event == 'PrintStarted':
