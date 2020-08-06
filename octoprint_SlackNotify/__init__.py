@@ -1,7 +1,11 @@
 from __future__ import absolute_import, unicode_literals
 
+import os
+
 import octoprint.plugin
 from slackclient import SlackClient
+
+from moviepy.editor import *
 
 
 class SlackNotifyPlugin(octoprint.plugin.EventHandlerPlugin,
@@ -13,6 +17,12 @@ class SlackNotifyPlugin(octoprint.plugin.EventHandlerPlugin,
     def get_settings_restricted_paths(self):
         return dict(admin=["bot_token"])
 
+    def _time_symetrize(self, clip):
+        """ Returns the clip played forwards then backwards. In case
+        you are wondering, vfx (short for Video FX) is loaded by
+        >>> from moviepy.editor import * """
+        return concatenate([clip, clip.fx(vfx.time_mirror)])
+
     def _send_to_slack(self, message, media=None):
         token = self._settings.get(['bot_token'])
         recipient = self._settings.get(['channel_id'])
@@ -23,12 +33,22 @@ class SlackNotifyPlugin(octoprint.plugin.EventHandlerPlugin,
         client = SlackClient(token)
 
         if media:
+            # Videos don't automatically unfurl, so convert to a gif
+
+            # NOTE: Broken, requies `export FFMPEG_BINARY=/usr/bin/ffmpeg` and still throws an error
+
+            gif_file = media + ".gif"
+            clip = (VideoFileClip(media, audio=False)
+                    .fx(self._time_symetrize))
+            clip.write_gif(gif_file)
+            # Send gif
             result = client.api_call(
                 "files.upload",
                 channels=[recipient],
-                file=open(media, 'rb'),
+                file=open(gif_file, 'rb'),
                 title=message,
             )
+            os.remove(gif_file) # Clean up
         else:
             result = client.api_call(
                 "chat.postMessage",
