@@ -33,7 +33,7 @@ plugin_url = "https://github.com/MisterGlass/OctoPrint-SlackNotify"
 plugin_license = "MIT"
 
 # Any additional requirements besides OctoPrint should be listed here
-plugin_requires = ['slackclient==1.3.2']
+plugin_requires = ['slackclient==1.3.2', 'google-api-python-client', 'google-auth-oauthlib', 'sougoogle-auth-httplib2']
 
 ### --------------------------------------------------------------------------------------------------------------------
 ### More advanced options that you usually shouldn't have to touch follow after this point

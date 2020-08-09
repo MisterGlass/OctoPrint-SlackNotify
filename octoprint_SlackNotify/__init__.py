@@ -23,6 +23,19 @@ class SlackNotifyPlugin(octoprint.plugin.EventHandlerPlugin,
         client = SlackClient(token)
 
         if media:
+            params = {
+                '--file': media,
+                '--title': 'Test Title',
+                '--description': 'Test Description',
+                '--category': '22',
+                '--keywords': '',
+                '--privacyStatus':'private',
+            }
+            youtube = get_authenticated_service()
+            try:
+                initialize_upload(youtube, args)
+            except HttpError, e:
+                print 'An HTTP error %d occurred:\n%s' % (e.resp.status, e.content)
             result = client.api_call(
                 "files.upload",
                 channels=[recipient],
