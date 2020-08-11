@@ -1,6 +1,10 @@
 from __future__ import absolute_import, unicode_literals
 
+import tempfile
+
+import imageio
 import octoprint.plugin
+from pygifsicle import optimize
 from slackclient import SlackClient
 
 
@@ -23,12 +27,18 @@ class SlackNotifyPlugin(octoprint.plugin.EventHandlerPlugin,
         client = SlackClient(token)
 
         if media:
-            result = client.api_call(
-                "files.upload",
-                channels=[recipient],
-                file=open(media, 'rb'),
-                title=message,
-            )
+            with tempfile.TemporaryFile() as imagefile:
+                # Render to a gif so it will display inside slack
+                source = imageio.get_reader(media)
+                imageio.mimwrite(imagefile, source)
+                optimize(imagefile)
+
+                result = client.api_call(
+                    "files.upload",
+                    channels=[recipient],
+                    file=open(imagefile, 'rb'),
+                    title=message,
+                )
         else:
             result = client.api_call(
                 "chat.postMessage",
