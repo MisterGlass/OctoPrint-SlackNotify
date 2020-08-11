@@ -65,3 +65,5 @@ class SlackNotifyPlugin(octoprint.plugin.EventHandlerPlugin,
 
 
 __plugin_implementation__ = SlackNotifyPlugin()
+
+__plugin_pythoncompat__ = ">=3,4"
