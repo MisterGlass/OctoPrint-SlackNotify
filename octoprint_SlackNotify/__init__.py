@@ -3,6 +3,8 @@ from __future__ import absolute_import, unicode_literals
 import octoprint.plugin
 from slackclient import SlackClient
 
+from .youtube_uploader import upload_to_youtube
+
 
 class SlackNotifyPlugin(octoprint.plugin.EventHandlerPlugin,
                         octoprint.plugin.SettingsPlugin,
@@ -23,19 +25,16 @@ class SlackNotifyPlugin(octoprint.plugin.EventHandlerPlugin,
         client = SlackClient(token)
 
         if media:
-            params = {
-                '--file': media,
-                '--title': 'Test Title',
-                '--description': 'Test Description',
-                '--category': '22',
-                '--keywords': '',
-                '--privacyStatus':'private',
-            }
-            youtube = get_authenticated_service()
-            try:
-                initialize_upload(youtube, args)
-            except HttpError, e:
-                print 'An HTTP error %d occurred:\n%s' % (e.resp.status, e.content)
+
+            upload_to_youtube(
+                '--file'=media,
+                '--title'='Test Title',
+                '--description'='Test Description',
+                '--category'='22',
+                '--keywords'='',
+                '--privacyStatus'='private',
+            )
+
             result = client.api_call(
                 "files.upload",
                 channels=[recipient],
