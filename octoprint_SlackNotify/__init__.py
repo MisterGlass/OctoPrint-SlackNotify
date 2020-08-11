@@ -1,7 +1,7 @@
 from __future__ import absolute_import, unicode_literals
 
 import octoprint.plugin
-from slackclient import SlackClient
+from slack import WebClient
 
 
 class SlackNotifyPlugin(octoprint.plugin.EventHandlerPlugin,
@@ -13,28 +13,25 @@ class SlackNotifyPlugin(octoprint.plugin.EventHandlerPlugin,
     def get_settings_restricted_paths(self):
         return dict(admin=["bot_token"])
 
-    def _send_to_slack(self, message, media=None):
+    def _send_to_slack(self, message, media=None, filename=None):
         token = self._settings.get(['bot_token'])
         recipient = self._settings.get(['channel_id'])
         if not token or not recipient:
             self._logger.warning('Slack settings misconfigured')
             return
 
-        client = SlackClient(token)
+        client = WebClient(token=os.environ['SLACK_API_TOKEN'])
 
         if media:
-            result = client.api_call(
-                "files.upload",
-                channels=[recipient],
-                file=open(media, 'rb'),
+            client.files_upload(
+                channels=recipient,
                 title=message,
-            )
+                filename=filename,
+                file=media)
         else:
-            result = client.api_call(
-                "chat.postMessage",
+            client.chat_postMessage(
                 channel=recipient,
-                text=message,
-            )
+                text=message)
 
     def on_event(self, event, payload):
         if event == 'PrintStarted':
@@ -54,7 +51,10 @@ class SlackNotifyPlugin(octoprint.plugin.EventHandlerPlugin,
             self._send_to_slack(message)
         elif event == 'MovieDone':
             message = 'Finished rendering timelapse for %s' % payload['gcode']
-            self._send_to_slack(message, payload['movie'])
+            self._send_to_slack(
+                message,
+                media=payload['movie'],
+                filename=payload['movie_basename'])
         else:
             return
 
