@@ -32,9 +32,8 @@ plugin_url = "https://github.com/MisterGlass/OctoPrint-SlackNotify"
 # The plugin's license. Can be overwritten within OctoPrint's internal data via __plugin_license__ in the plugin module
 plugin_license = "MIT"
 
-# Any additional requirements besides OctoPrint should be listed here
-
-plugin_requires = ['slackclient']
+# Any additional requirements besides OctoPrint should be listed here\
+plugin_requires = ['slackclient==2.9.0', 'PyVimeo==1.1.0']
 
 ### --------------------------------------------------------------------------------------------------------------------
 ### More advanced options that you usually shouldn't have to touch follow after this point

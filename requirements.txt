@@ -1,1 +1,2 @@
-slackclient
+slackclient==2.9.0
+PyVimeo==1.1.0
